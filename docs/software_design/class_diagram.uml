@@ -1,0 +1,168 @@
+@startuml
+
+package Qt {
+    class QGraphicsItem {
+        #{abstract}paint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*) : void
+        #{abstract}boundingRect() const : QRectF
+    }
+
+    class QGraphicsLayoutItem {
+	+{abstract}setGeometry(const QRectF&) override : void
+	#{abstract}sizeHint() const override : void
+    }
+}
+
+class Presenter::PrimaryFlightDisplay {
+    -QGraphicsLayoutItem m_layout
+    -std::unique_ptr<View::IPrimaryFlightDisplay> m_view
+    -std::shared_ptr<Model::IModel> m_model
+}
+
+class View::IPrimaryFlightDisplay {
+    IPrimaryFlightDisplay()
+    +{abstract} ~IPrimaryFlightDisplay()
+    +{abstract} setSpeed(float) : void
+    +{abstract} setVerticalSpeed(float) : void
+    +{abstract} setAltitude(float) : void
+    +{abstract} setAttitude(Axis&) : void
+    +{abstract} setAttitude(float, float, float) : void
+    +{abstract} setHeading(float) : void
+    s_linearControlChanged(int x, int y) : void
+    s_rotationControlChanged(int x, int y) : void
+    s_lightTurnedOnRequested() : void
+    s_lightTurnedOffRequested() : void
+    s_gpsTurnedOnRequested() : void
+    s_gpsTurnedOffRequested() : void
+    s_mapOpenedRequested() : void
+    s_mapClosedRequested() : void
+    s_normalModeRequested() : void
+    s_ecoModeRequested() : void
+    s_sportModeRequested() : void
+}
+
+class View::PrimaryFlightDisplay {
+    +PrimaryFlightDisplay(QGraphicsItem*, Qt::WindowFlags)
+    +PrimaryFlightDisplay(const PrimaryFlightDisplay&)
+    +PrimaryFlightDisplay(PrimaryFlightDisplay&&)
+    +{abstract} ~PrimaryFlightDisplay()
+    +setSpeed(float) override : void
+    +setVerticalSpeed(float) override : void
+    +setAltitude(float) override : void
+    +setAttitude(Axis&) override : void
+    +setAttitude(float, float, float) override : void
+    +setHeading(float heading) override : void
+    +operator=(const PrimaryFlightDisplay&) : PrimaryFlightDisplay&
+    +operator=(PrimaryFlightDisplay&&) : PrimaryFlightDisplay&
+
+    -m_graphicsGridLayout : std::unique_ptr<QGraphicsGridLayout>
+    -m_speedIndicator : std::unique_ptr<View::SpeedIndicator>
+    -m_altitudeIndicator : std::unique_ptr<View::AltitudeIndicator>
+    -m_attitudeIndicator : std::unique_ptr<View::AttitudeIndicator>
+    -m_headingIndicator : std::unique_ptr<View::HeadingIndicator>
+}
+
+class Model::IModel {
+    #IModel()
+    +{abstract} ~IModel()
+    +{abstract} linearAcceleration() const : const Axis&
+    +{abstract} angularVelocity() const : const Axis&
+    +{abstract} magneticField() const : const Axis&
+    +{abstract} temperature(enum TemperatureUnit) const : const float&
+}
+
+class Model::Imu {
+    +Imu(const IModel&)
+    +Imu(const Controller::Imu&)
+    +Imu(Controller::Imu&&)
+    +{abstract} ~Imu()
+    +speed() const override : const float&
+    +{abstract} verticalSpeed(const enum SpeedUnit) const override : const float&
+    +{abstract} heading() const override : const float&
+    +{abstract} altitude(const enum AltitudeUnit) const override : const float&
+    +operator=(const Imu&) : Controller::Imu&
+    +operator=(Imu&&) : Controller::Imu&
+}
+
+class ICommunicationProtocol {
+    +ICommunicationProtocol()
+    +ICommunicationProtocol(const ICommunicationProtocol&)
+    +ICommunicationProtocol(ICommunicationProtocol&&)
+    +{abstract} ~ICommunicationProtocol
+    +rawAccelerometerDataChanged(const char*, size_t size) : void
+    +rawGyroscopeDataChanged(const char*, size_t size) : void
+    +rawMagnetometerDataChanged(const char*, size_t size) : void
+    +rawTemperatureDataChanged(const char*; size_t size) : void
+}
+
+Model::Imu *-down- ICommunicationProtocol
+
+class QSerialPort
+
+ICommunicationProtocol <|-down- QSerialPort
+
+package Indicators {
+class View::SpeedIndicator {
+
+}
+class View::AltitudeIndicator {
+}
+
+class View::AttitudeIndicator {
+}
+
+class View::HeadingIndicator {
+}
+}
+
+Presenter::PrimaryFlightDisplay *-down- IController
+Presenter::PrimaryFlightDisplay *-down- Model::PrimaryFlightDisplay
+Presenter::PrimaryFlightDisplay *-down- View::IPrimaryFlightDisplay
+
+View::IPrimaryFlightDisplay  <|-down- View::PrimaryFlightDisplay
+Model::IModel <|-down- Model::Imu
+
+Model::Imu *-down- Model::Accelerometer
+Model::Imu *-down- Model::Gyroscope
+Model::Imu *-down- Model::Magnetometer
+
+IController <|-down- Controller::Imu
+Controller::Imu *-down- Model::Imu
+
+View::PrimaryFlightDisplay *-down-- View::SpeedIndicator
+View::PrimaryFlightDisplay *-down-- View::AltitudeIndicator
+View::PrimaryFlightDisplay *-down-- View::AttitudeIndicator
+View::PrimaryFlightDisplay *-down-- View::HeadingIndicator
+
+QGraphicsItemGroup <|-down- View::SpeedIndicator
+QGraphicsItemGroup <|-down- View::AltitudeIndicator
+QGraphicsItemGroup <|-down- View::AttitudeIndicator
+QGraphicsItemGroup <|-down- View::HeadingIndicator
+
+class View::LinearGauge {
+    +LinearGauge(QGraphicsItem*, QGraphicsLayoutItem*)
+    +setGeometry(const QRectF&) : override
+    #boundingRect() const : QRectF
+    #paint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*) : void
+    #sizeHint(Qt::SizeHint, const QSizeF&) const override : void
+}
+
+class View::LinearGaugeValue {
+    +LinearGaugeValue(QGraphicsItem*, QGraphicsLayoutItem*)
+    +setGeometry(const QRectF&) : override
+    #boundingRect() const : QRectF
+    #paint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*) : void
+    #sizeHint(Qt::SizeHint, const QSizeF&) const override : void
+}
+
+QGraphicsItem <|--down- View::LinearGauge
+QGraphicsLayoutItem <|--down- View::LinearGauge
+QGraphicsItem <|--down- View::LinearGaugeValue
+QGraphicsLayoutItem <|--down- View::LinearGaugeValue
+
+View::SpeedIndicator *-down- View::LinearGauge
+View::SpeedIndicator *-down- View::LinearGaugeValue
+View::AltitudeIndicator *-down- View::LinearGauge
+View::AltitudeIndicator *-down- View::LinearGaugeValue
+View::AttitudeIndicator *-down- View::LinearGauge
+
+@enduml
