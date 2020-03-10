@@ -214,6 +214,14 @@ void LinearGaugeValue::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
 }
 
 
+void LinearGaugeValue::setGeometry(const QRectF& geometry)
+{
+    prepareGeometryChange();
+    QGraphicsLayoutItem::setGeometry(geometry);
+    setPos(geometry.topLeft());
+}
+
+
 QSizeF LinearGaugeValue::sizeHint(Qt::SizeHint which, const QSizeF& constraint) const
 {
     switch (which)

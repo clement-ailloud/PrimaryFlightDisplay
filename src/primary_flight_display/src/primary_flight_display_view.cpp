@@ -18,7 +18,7 @@ PrimaryFlightDisplay::PrimaryFlightDisplay(QGraphicsItem* parent, Qt::WindowFlag
     m_speedIndicator->setSpeed(17.0f);
 
     m_graphicsGridLayout->addItem(m_speedIndicator.get(), 0, 0);
-    m_graphicsGridLayout->addItem(m_attitudeIndicator.get(), 0, 1);
+    m_graphicsGridLayout->addItem(m_attitudeIndicator.get(), 0, 1, 1, 4);
     setLayout(m_graphicsGridLayout.release());
 }
 

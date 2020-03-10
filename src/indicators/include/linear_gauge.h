@@ -77,13 +77,7 @@ class LinearGauge final : public QGraphicsItem, public QGraphicsLayoutItem
 
         void drawCurrentSpeed(QPainter* painter, int speed);
 
-        void setBoundingRect(const QRectF rect){
-            m_boundingRect = rect;
-
-	    prepareGeometryChange();
-
-	    update(rect);
-        }
+	void setGeometry(const QRectF& geometry) override;
 
         void setBorder(bool enable);
 

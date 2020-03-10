@@ -17,7 +17,7 @@ AttitudeIndicator::AttitudeIndicator(QGraphicsItem* parent, QGraphicsLayoutItem*
     , QGraphicsLayoutItem(parentLayout)
     , m_linearGauge(std::make_unique<LinearGauge>(this, this))
 {
-    m_linearGauge->setBoundingRect(QRectF(-50.f, -150.f, 100.f, 300.f));
+    m_linearGauge->setGeometry(QRectF(-50.f, -150.f, 100.f, 300.f));
     m_linearGauge->setAlignment(LinearGauge::AlignCenter);
     m_linearGauge->setTextVisible(false);
     m_linearGauge->setBorder(false);
@@ -33,6 +33,14 @@ AttitudeIndicator::AttitudeIndicator(QGraphicsItem* parent, QGraphicsLayoutItem*
 
 AttitudeIndicator::~AttitudeIndicator()
 {
+}
+
+
+void AttitudeIndicator::setGeometry(const QRectF& geometry)
+{
+    prepareGeometryChange();
+    QGraphicsLayoutItem::setGeometry(geometry);
+    setPos(geometry.topLeft());
 }
 
 

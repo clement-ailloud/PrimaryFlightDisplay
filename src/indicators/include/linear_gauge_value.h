@@ -46,6 +46,8 @@ class LinearGaugeValue : public QGraphicsItem, public QGraphicsLayoutItem
 
         QRectF boundingRect() const override;
 
+	void setGeometry(const QRectF& geometry) override;
+
         void paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
                 QWidget* widget) override;
 

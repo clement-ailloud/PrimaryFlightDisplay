@@ -24,7 +24,7 @@ AirspeedIndicator::AirspeedIndicator(QGraphicsItem* parent, QGraphicsLayoutItem*
     : QGraphicsItemGroup(parent)
     , QGraphicsLayoutItem(parentLayout)
     , m_linearGauge(std::make_unique<LinearGauge>(this, this))
-    , m_linearGaugeValue(std::make_unique<LinearGaugeValue>(this, this))
+    , m_linearGaugeValue(std::make_unique<LinearGaugeValue>(m_linearGauge.get(), this))
 {
     m_linearGauge->setGeometry(QRectF(-50.f, -150.f, 100.f, 300.f));
 }
@@ -35,9 +35,11 @@ AirspeedIndicator::~AirspeedIndicator()
 }
 
 
-void AirspeedIndicator::setBoundingRect(const QRectF& boundingRect)
+void AirspeedIndicator::setGeometry(const QRectF& geometry)
 {
-    m_linearGauge->setBoundingRect(boundingRect);
+    prepareGeometryChange();
+    QGraphicsLayoutItem::setGeometry(geometry);
+    setPos(geometry.topLeft());
 }
 
 

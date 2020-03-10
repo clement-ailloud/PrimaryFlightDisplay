@@ -31,7 +31,7 @@ class AttitudeIndicator : public QGraphicsItemGroup, public QGraphicsLayoutItem
 
         virtual ~AttitudeIndicator();
 
-	void setBoundingRect(const QRectF& boundingRect);
+	void setGeometry(const QRectF& geometry) override;
 
 	/*
 	 * @fn	    setFlightDirectorSystem(FlightDirectorSystem& fds

@@ -277,6 +277,14 @@ void LinearGauge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
 }
 
 
+void LinearGauge::setGeometry(const QRectF& geometry)
+{
+    prepareGeometryChange();
+    QGraphicsLayoutItem::setGeometry(geometry);
+    setPos(geometry.topLeft());
+}
+
+
 QSizeF LinearGauge::sizeHint(Qt::SizeHint which, const QSizeF& constraint) const
 {
     switch (which)

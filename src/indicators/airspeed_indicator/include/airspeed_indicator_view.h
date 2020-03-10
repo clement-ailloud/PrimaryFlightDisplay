@@ -45,7 +45,7 @@ class AirspeedIndicator : public QGraphicsItemGroup, public QGraphicsLayoutItem
 
 	virtual ~AirspeedIndicator();
 
-	void setBoundingRect(const QRectF& boundingRect);
+	void setGeometry(const QRectF& geometry) override;
 
 	// TODO: remove later because already stored as value in linear gauge
 	void setSpeed(int speed);
