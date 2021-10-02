@@ -36,12 +36,19 @@ build
 
 # Vim files
 *.vim
-
-# Swap files
 *.swp
-
-# Undo files
 *.un~
 
 # CTags file
 tags
+
+# Clang files
+.clang-format
+.clang-tidy
+
+# Cache directory
+.cache/
+
+# Pre-commit file
+.pre-commit-config.yaml
+cmake/modules/PreCommit.cmake
