@@ -1,6 +1,6 @@
 #include "attitude_indicator_view.h"
 
-#include "linear_gauge/linear_gauge.h"
+#include "gauge_indicator/linear_gauge.h"
 //#include "linear_gauge_value.h"
 
 #include "QHBoxLayout"
@@ -16,10 +16,11 @@ AttitudeIndicator::AttitudeIndicator(QWidget* parent)
     : QWidget(parent)
     , m_linearLayout(new QHBoxLayout())
     , m_linearGauge(new LinearGauge(this))
-//    , m_attitudeIndicatorSymbol(new AttitudeIndicatorSymbol(this))
+// , m_attitudeIndicatorSymbol(new AttitudeIndicatorSymbol(this))
 {
     m_linearGauge->setAlignment(Qt::AlignCenter);
-    m_linearGauge->setTickInterval(5);
+    m_linearGauge->setTicksPosition(AbstractGauge::TicksPosition::TicksCenter);
+    m_linearGauge->setLargeTickInterval(10);
     m_linearGauge->setLargeTickCount(2);
     m_linearGauge->setMiddleTickCount(1);
     m_linearGauge->setGroundVisible(false);
@@ -27,6 +28,5 @@ AttitudeIndicator::AttitudeIndicator(QWidget* parent)
     m_linearLayout->addWidget(m_linearGauge);
     setLayout(m_linearLayout);
 }
-
 
 AttitudeIndicator::~AttitudeIndicator() = default;

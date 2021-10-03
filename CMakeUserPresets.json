@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 17,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "developer",
+      "inherits": "default",
+      "displayName": "Default configuration using Ninja Multi-Config generator on Linux system",
+      "environment": {
+        "CMAKE_CXX_COMPILER_LAUNCHER": "/usr/bin/ccache",
+        "CMAKE_CXX_LINKER_LAUNCHER": "/usr/bin/ccache",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "warnings": {
+          "dev": true,
+          "deprecated": true,
+          "systemVars": true
+      },
+      "errors": {
+          "dev": true,
+          "deprecated": true
+      }
+    }
+  ]
+}

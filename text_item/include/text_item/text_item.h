@@ -1,16 +1,19 @@
 /**
-* @file
-*
-* @brief
-*
-* @date
-*
-* @author     Clement Ailloud
-*/
+ * @file
+ *
+ * @brief
+ *
+ * @date
+ *
+ * @author     Clement Ailloud
+ */
 
-#include "qstring.h"
-#include "qrect.h"
+#ifndef TEXT_ITEM_H
+#define TEXT_ITEM_H
+
 #include "qfont.h"
+#include "qrect.h"
+#include "qstring.h"
 
 #include "Qt"
 
@@ -25,7 +28,7 @@ void drawTextItem(QPainter& painter, int x, int y, TextItem& item);
 
 class TextItem
 {
-public:
+  public:
     TextItem();
     explicit TextItem(QString text, QFont font = QFont());
 
@@ -40,7 +43,6 @@ public:
     const QFont& font() const;
     void setFont(QFont font);
 
-    // TODO: remove from class
     QPoint position() const;
     void setPosition(const QPoint& position);
 
@@ -49,16 +51,18 @@ public:
 
     TextItem& operator=(const QString& text)
     {
-        if (text == _text)
+        if (text == m_text)
             return *this;
 
-        _text = text;
+        m_text = text;
         return *this;
     }
 
-private:
-    QString _text;
-    QFont _font;
-    QRect _fontRect;
-    Qt::Alignment _alignment;
+  private:
+    QString m_text;
+    QFont m_font;
+    QRect m_fontRect;
+    Qt::Alignment m_alignment;
 };
+
+#endif

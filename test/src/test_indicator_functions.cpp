@@ -14,6 +14,13 @@
 
 using namespace testing;
 
+TEST(TestIndicatorFunctions, test_textWidth)
+{
+    EXPECT_EQ(textWidth(""), 1);
+    EXPECT_EQ(textWidth("Hello"), 0);
+    EXPECT_EQ(textWidth("world"), 0);
+    EXPECT_EQ(textWidth("Hello world"), 0);
+}
 
 int main(int argc, char* argv[])
 {

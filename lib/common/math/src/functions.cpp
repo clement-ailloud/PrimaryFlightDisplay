@@ -20,7 +20,6 @@ namespace Math
 
 float floor(float value, float interval)
  {
-    assert(interval != 0.f);
     return value - std::fmod(value, interval);
  }
 

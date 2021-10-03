@@ -14,7 +14,7 @@
 
 using namespace testing;
 
-TEST(TestTextItem, DefaultTextItem)
+TEST(TestTextItem, test_TextItem)
 {
     // Default constructor
     {
@@ -27,12 +27,12 @@ TEST(TestTextItem, DefaultTextItem)
     }
 
     // Custom constructor using default font
-    {
-        QString text("Hello world!");
-        TextItem item(text);
-        EXPECT_EQ(item.text(), text);
-        EXPECT_EQ(item.font(), QFont());
-    }
+//    {
+//        QString text("Hello world!");
+//        TextItem item(text);
+//        EXPECT_EQ(item.text(), text);
+//        EXPECT_EQ(item.font(), QFont());
+//    }
 
 //    // Custom constructor
 //    {

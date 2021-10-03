@@ -25,6 +25,9 @@ class QString;
  */
 void drawTick(QPainter& painter, const QRect& rect);
 
+void drawRoundedTick(QPainter& painter, const QRect& rect, float xRadius, float yRadius,
+                     Qt::SizeMode mode = Qt::RelativeSize);
+
 void drawTick(QPainter& painter, const QRect& rect, const QBrush& brush);
 
 void drawText(QPainter& painter,
@@ -43,12 +46,25 @@ void drawLargeTickLabel(QPainter& painter,
                         int number = 0,
                         Qt::Alignment alignment = Qt::AlignLeft);
 
+void initializeTicksLabelValue(std::vector<int>& v, float value, unsigned long count,
+                               float interval);
+
+/**
+ * @brief   Draws the widget's border depending on border given the widget's size.
+ */
+void drawBorder(QPainter &painter, const QSize& size);//, Border border);
+
+/**
+ * @brief   Draws the path over the ground (i.e. values that cannot be reached).
+ */
+void drawGround(QPainter& painter, const QRect& rect, const QBrush& brush);
+
 /**
  * @brief   Returns the width in pixel depending on font
  * @param   text
  * @param   font
  */
-int textWidth(const QString& text, const QFont& font);
+int textWidth(const QString& text, const QFont& font = {});
 
 /**
  * @brief   Returns the height in pixel depending on font

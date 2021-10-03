@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.17.0)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
-include(CCache)
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 project(PrimaryFlightDisplay
     VERSION 1.0
@@ -12,25 +11,29 @@ project(PrimaryFlightDisplay
 include(CPackConfig)
 include(PreCommit)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-#set(CMAKE_CXX_CPPCHECK cppcheck --project=${CMAKE_BINARY_DIR}/compile_commands.json --enable=all --output-file=${CMAKE_BINARY_DIR}/cppcheck_output.txt)
-#set(CMAKE_CXX_CLANG_TIDY clang-tidy --use-color -header-filter=.* --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy -p ${CMAKE_BINARY_DIR})
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set(CMAKE_LINK_WHAT_YOU_USE iwyu ${CMAKE_BINARY_DIR})
 #set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE )
 
-# Common output directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>)
-
 # Ninja Multi-Config
-if(CMAKE_GENERATOR STREQUAL "Ninja Multi-Config")
+get_property(IS_MULTI_CONFIG_GENERATOR GLOBAL
+    PROPERTY GENERATOR_IS_MULTI_CONFIG
+)
+if(IS_MULTI_CONFIG_GENERATOR)
     set(CMAKE_CONFIGURATION_TYPES Debug Release)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG Debug)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG Debug)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE Release)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE Release)
+else()
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BUILD_TYPE})
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_TYPE})
 endif()
 
 # Common compile options
 if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     add_compile_options(
+        -g
         -Wall
         -Wextra
         -Wpedantic
@@ -48,43 +51,40 @@ endif()
 include(ExternalProject)
 ExternalProject_Add(
     VirtualJoystickController
-    #PREFIX ${CMAKE_CURRENT_BINARY_DIR}/VirtualJoystickController
     GIT_REPOSITORY https://github.com/clement-ailloud/VirtualJoystickController
     GIT_TAG develop
     TIMEOUT 10
-    #UPDATE_COMMAND ${GIT_EXECUTABLE} pull
-    UPDATE_COMMAND ""
+    UPDATE_COMMAND ""#${GIT_EXECUTABLE} pull"
     INSTALL_COMMAND ""
     BINARY_DIR ${CMAKE_BINARY_DIR}/external
     DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/downloads
-    #LOG_DOWNLOAD ON
-    #CONFIGURE_COMMAND ""
-    #BUILD_COMMAND ""
-    #LOG_CONFIGURE ON
-    #LOG_BUILD ON
-    #BUILD_IN_SOURCE TRUE
 )
 
-#find_package(Boost 1.6.1 REQUIRED)
 find_package(Qt5
     COMPONENTS
         Core      REQUIRED
         Widgets   REQUIRED
         Gui       REQUIRED
 )
+set(CMAKE_AUTOMOC TRUE)
+set(CMAKE_AUTOGEN_PARALLEL TRUE)
 
 add_executable(${CMAKE_PROJECT_NAME}
     ${CMAKE_SOURCE_DIR}/src/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/primary_flight_display/src/primary_flight_display_view.cpp
 )
+
+if(ANDROID)
+    target_sources(${CMAKE_PROJECT_NAME}
+        PRIVATE
+            ${CMAKE_SOURCE_DIR}/android/AndroidManifest.xml
+    )
+endif()
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
-        #${Boost_LIBRARIES}
-        PrimaryFlightDisplayIndicator
+        FlightInstruments
 	Qt5::Widgets
 )
-
 
 set_target_properties(${CMAKE_PROJECT_NAME}
     PROPERTIES
@@ -92,21 +92,27 @@ set_target_properties(${CMAKE_PROJECT_NAME}
 
 	CXX_STANDARD 17
         CXX_EXTENSIONS ON
-        CXX_STANDARD_REQUIRED ON
 )
 
 install(TARGETS ${CMAKE_PROJECT_NAME}
     EXPORT ${CMAKE_PROJECT_NAME}Targets
-    CONFIGURATIONS Debug Release
+    CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
     PUBLIC_HEADER DESTINATION include
 )
 
+add_subdirectory(primary_flight_display)
 add_subdirectory(lib)
+add_subdirectory(text_item)
+add_subdirectory(gauge_indicator)
 add_subdirectory(indicators)
 
-list(APPEND CMAKE_CTEST_ARGUMENTS "--verbose")
-include(CTest)
-add_subdirectory(test)
+if(NOT ANDROID)
+    list(APPEND CMAKE_CTEST_ARGUMENTS "--verbose")
+    include(CTest)
+    add_subdirectory(test)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test PROPERTY PROCESSOR_AFFINITY TRUE)
+endif()
+
 
 #include(CMakePackageConfigHelpers)
 

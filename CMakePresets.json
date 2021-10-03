@@ -10,27 +10,16 @@
       "name": "default",
       "displayName": "Default configuration using Ninja Multi-Config generator",
       "generator": "Ninja Multi-Config",
-      "binaryDir": "${sourceDir}/build",
-      "vendor": {
-        "example.com/ExampleIDE/1.0": {
-          "autoFormat": true
-        }
-      },
-      "warnings": {
-          "dev": true,
-          "deprecated": true,
-          "systemVars": true
-      },
-      "errors": {
-          "dev": true,
-          "deprecated": true
-      }
+      "binaryDir": "${sourceDir}/build"
     }
   ],
   "buildPresets": [
     {
       "name": "default",
-      "configurePreset": "default"
+      "configurePreset": "default",
+      "environment": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/AndroidToolchain.cmake"
+      }
     }
   ],
   "testPresets": [

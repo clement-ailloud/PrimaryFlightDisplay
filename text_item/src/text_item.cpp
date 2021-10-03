@@ -28,81 +28,80 @@ void drawTextItem(QPainter& painter, int x, int y, TextItem& item)
 TextItem::TextItem() = default;
 
 TextItem::TextItem(QString text, QFont font)
-    : _text(std::move(text)), _font(std::move(font))
+    : m_text(std::move(text))
+    , m_font(std::move(font))
 {
-    adjusted(_fontRect, _text, _font);
-
-    qDebug() << _fontRect;
+    adjusted(m_fontRect, m_text, m_font);
 }
 
 Qt::Alignment TextItem::alignment() const
 {
-    return _alignment;
+    return m_alignment;
 }
 
 void TextItem::setAlignment(Qt::Alignment alignment)
 {
-    _alignment = alignment;
+    m_alignment = alignment;
 }
 
 const QString& TextItem::text() const
 {
-    return _text;
+    return m_text;
 }
 
 void TextItem::setText(const QString& text)
 {
-    if (text == _text)
+    if (text == m_text)
     {
         return;
     }
 
-    _text = text;
-    _fontRect = adjusted(_fontRect, _text, _font);
+    m_text = text;
+    m_fontRect = adjusted(m_fontRect, m_text, m_font);
 }
 
 const QFont& TextItem::font() const
 {
-    return _font;
+    return m_font;
 }
 
 void TextItem::setFont(QFont font)
 {
-    if (font == _font)
+    if (font == m_font)
     {
         return;
     }
 
-    _font = std::move(font);
-    adjusted(_fontRect, _text, _font);
+    m_font = std::move(font);
+    adjusted(m_fontRect, m_text, m_font);
 }
 
 QPoint TextItem::position() const
 {
-    return _fontRect.topLeft();
+    return m_fontRect.topLeft();
 }
 
 void TextItem::setPosition(const QPoint& position)
 {
-    _fontRect.setTopLeft(position);
+    m_fontRect.moveTopLeft(position);
 }
 
 int TextItem::width() const
 {
-    return _fontRect.width();
+    return m_fontRect.width();
 }
 
 int TextItem::height() const
 {
-    return _fontRect.height();
+    return m_fontRect.height();
 }
 
 const QRect& TextItem::boundingRect() const
 {
-    return _fontRect;
+    return m_fontRect;
 }
 
 QSize TextItem::size() const
 {
-    return _fontRect.size();
+    return m_fontRect.size();
 }

@@ -50,5 +50,4 @@ tags
 .cache/
 
 # Pre-commit file
-.pre-commit-config.yaml
 cmake/modules/PreCommit.cmake

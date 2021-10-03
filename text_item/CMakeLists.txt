@@ -16,17 +16,6 @@ target_link_libraries(TextItem
 	Qt5::Gui
 )
 
-#set_target_properties(TextItem
-#    PROPERTIES
-#        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test/$<CONFIG>
-#
-#	CXX_STANDARD 17
-#        CXX_EXTENSIONS ON
-#        CXX_STANDARD_REQUIRED ON
-#
-#        LINKER_LANGUAGE     CXX
-#)
-
 install(TARGETS TextItem
     EXPORT TextItemTargets
         CONFIGURATIONS Debug Release

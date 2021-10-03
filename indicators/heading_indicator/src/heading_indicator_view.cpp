@@ -8,10 +8,9 @@
  * @author     Clement Ailloud
  */
 
-
 #include "heading_indicator_view.h"
 
-#include "linear_gauge/linear_gauge.h"
+#include "gauge_indicator/linear_gauge.h"
 
 #include "QColor"
 #include "QHBoxLayout"
@@ -24,8 +23,8 @@ HeadingIndicator::HeadingIndicator(QWidget* parent)
     , m_linearLayout(new QHBoxLayout())
     , m_linearGauge(new LinearGauge(this))
 {
-    m_linearGauge->setFont(QFont("Cantarell", 20));
     m_linearGauge->setAlignment(Qt::AlignBottom);
+    m_linearGauge->setTicksPosition(AbstractGauge::TicksPosition::TicksBelow);
     m_linearGauge->setOrientation(Qt::Horizontal);
     m_linearGauge->setGroundVisible(false);
     m_linearGauge->setLargeTickCount(3);

@@ -40,3 +40,26 @@ add_test(NAME TestIndicatorFunctions
     --config $<CONFIG>
     --exe $<TARGET_FILE:testIndicatorFunctions>
 )
+
+add_executable(testLinearGauge
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_linear_gauge.cpp
+)
+
+target_include_directories(testLinearGauge
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(testLinearGauge
+    PRIVATE
+        IndicatorFunctions
+        Qt5::Gui
+        GTest::gtest
+        GTest::gtest_main
+)
+
+add_test(NAME TestLinearGauge
+    COMMAND testLinearGauge
+    --config $<CONFIG>
+    --exe $<TARGET_FILE:testLinearGauge>
+)

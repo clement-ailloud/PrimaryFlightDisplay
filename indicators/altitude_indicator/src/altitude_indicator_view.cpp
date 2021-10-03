@@ -8,10 +8,9 @@
  * @author     Clement Ailloud
  */
 
-
 #include "altitude_indicator_view.h"
 
-#include "linear_gauge/linear_gauge.h"
+#include "gauge_indicator/linear_gauge.h"
 //#include "linear_gauge_value.h"
 
 #include "QHBoxLayout"
@@ -22,10 +21,11 @@ AltitudeIndicator::AltitudeIndicator(QWidget* parent)
     : QWidget(parent)
     , m_linearLayout(new QHBoxLayout())
     , m_linearGauge(new LinearGauge(this))
-//    , m_linearGaugeValue(new LinearGaugeValue(*m_linearGauge))
+// , m_linearGaugeValue(new LinearGaugeValue(*m_linearGauge))
 {
-    m_linearGauge->setFont(QFont("Cantarell", 20));
+    m_linearGauge->setLargeTickInterval(10);
     m_linearGauge->setAlignment(Qt::AlignLeft);
+    m_linearGauge->setTicksPosition(AbstractGauge::TicksPosition::TicksLeft);
     m_linearGauge->setMiddleTickCount(1);
     QPalette palette;
     QColor backgroundColor("#7ec850");

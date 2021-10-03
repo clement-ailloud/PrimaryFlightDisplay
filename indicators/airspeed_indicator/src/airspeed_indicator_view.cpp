@@ -10,7 +10,7 @@
 
 #include "airspeed_indicator_view.h"
 
-#include "linear_gauge/linear_gauge.h"
+#include "gauge_indicator/linear_gauge.h"
 //#include "linear_gauge_value.h"
 
 #include "QHBoxLayout"
@@ -24,7 +24,6 @@ AirspeedIndicator::AirspeedIndicator(QWidget* parent)
     , m_linearGauge(new LinearGauge(this))
 //    , m_linearGaugeValue(new LinearGaugeValue(*m_linearGauge))
 {
-    m_linearGauge->setFont(QFont("Cantarell", 20));
     m_linearGauge->setAlignment(Qt::AlignRight);
     m_linearGauge->setMiddleTickCount(1);
     QPalette palette;
