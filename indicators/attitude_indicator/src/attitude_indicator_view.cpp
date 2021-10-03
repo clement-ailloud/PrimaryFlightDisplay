@@ -16,9 +16,10 @@ AttitudeIndicator::AttitudeIndicator(QWidget* parent)
     : QWidget(parent)
     , m_linearLayout(new QHBoxLayout())
     , m_linearGauge(new LinearGauge(this))
-//    , m_attitudeIndicatorSymbol(new AttitudeIndicatorSymbol(*m_linearGauge))
+//    , m_attitudeIndicatorSymbol(new AttitudeIndicatorSymbol(this))
 {
     m_linearGauge->setAlignment(Qt::AlignCenter);
+    m_linearGauge->setTickInterval(5);
     m_linearGauge->setLargeTickCount(2);
     m_linearGauge->setMiddleTickCount(1);
     m_linearGauge->setGroundVisible(false);

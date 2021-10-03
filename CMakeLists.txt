@@ -15,12 +15,13 @@ include(PreCommit)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 #set(CMAKE_CXX_CPPCHECK cppcheck --project=${CMAKE_BINARY_DIR}/compile_commands.json --enable=all --output-file=${CMAKE_BINARY_DIR}/cppcheck_output.txt)
 #set(CMAKE_CXX_CLANG_TIDY clang-tidy --use-color -header-filter=.* --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy -p ${CMAKE_BINARY_DIR})
-set(CMAKE_LINK_WHAT_YOU_USE iwyu ${CMAKE_BINARY_DIR})
+#set(CMAKE_LINK_WHAT_YOU_USE iwyu ${CMAKE_BINARY_DIR})
 #set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE )
 
 # Common output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/$<LOWER_CASE:$<CONFIG>>)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/$<LOWER_CASE:$<CONFIG>>)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>)
 
 # Ninja Multi-Config
 if(CMAKE_GENERATOR STREQUAL "Ninja Multi-Config")
@@ -28,21 +29,22 @@ if(CMAKE_GENERATOR STREQUAL "Ninja Multi-Config")
 endif()
 
 # Common compile options
-if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
+if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
     add_compile_options(
         -Wall
         -Wextra
         -Wpedantic
         -fdiagnostics-color=always
-        $<$<CONFIG:Debug>:-fprofile-instr-generate>
-        $<$<CONFIG:Debug>:-fcoverage-mapping>
+        $<$<AND:$<CXX_COMPILER_ID:Clang>,$<CONFIG:Debug>>:-fprofile-instr-generate>
+        $<$<AND:$<CXX_COMPILER_ID:Clang>,$<CONFIG:Debug>>:-fcoverage-mapping>
     )
 endif()
 
-if (CMAKE_PLATFORM_ID STREQUAL "Linux")
+if(CMAKE_PLATFORM_ID STREQUAL "Linux")
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 endif()
 
+#find_package(Git REQUIRED)
 include(ExternalProject)
 ExternalProject_Add(
     VirtualJoystickController
@@ -53,6 +55,8 @@ ExternalProject_Add(
     #UPDATE_COMMAND ${GIT_EXECUTABLE} pull
     UPDATE_COMMAND ""
     INSTALL_COMMAND ""
+    BINARY_DIR ${CMAKE_BINARY_DIR}/external
+    DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/downloads
     #LOG_DOWNLOAD ON
     #CONFIGURE_COMMAND ""
     #BUILD_COMMAND ""
@@ -62,7 +66,6 @@ ExternalProject_Add(
 )
 
 #find_package(Boost 1.6.1 REQUIRED)
-#find_package(Git REQUIRED)
 find_package(Qt5
     COMPONENTS
         Core      REQUIRED
@@ -86,13 +89,10 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 set_target_properties(${CMAKE_PROJECT_NAME}
     PROPERTIES
         #DEBUG_POSTFIX "-debug"
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<LOWER_CASE:$<CONFIG>>
 
 	CXX_STANDARD 17
         CXX_EXTENSIONS ON
         CXX_STANDARD_REQUIRED ON
-
-        LINKER_LANGUAGE     CXX
 )
 
 install(TARGETS ${CMAKE_PROJECT_NAME}

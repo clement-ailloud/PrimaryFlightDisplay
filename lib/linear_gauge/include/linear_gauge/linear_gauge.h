@@ -41,6 +41,8 @@ public:
 
     ~LinearGauge() override;
 
+    void setTickInterval(unsigned long interval);
+
     /**
      * @brief   Returns the current widget orientation.
      */

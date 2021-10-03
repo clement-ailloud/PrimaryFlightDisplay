@@ -47,6 +47,8 @@ LinearGauge::LinearGauge(QWidget *parent)
     , m_font("Cantarell", 40)
     , m_brush(QColor("#7ec850"))
 {
+    setFocusPolicy(Qt::ClickFocus);
+
     // TODO: Adapt font size depending on widget size and digit count
     const QFontMetrics fm(m_font);
     m_fontSize.setWidth(fm.horizontalAdvance("000") + 1);
@@ -63,6 +65,12 @@ LinearGauge::LinearGauge(QWidget *parent)
 }
 
 LinearGauge::~LinearGauge() = default;
+
+void LinearGauge::setTickInterval(unsigned long interval)
+{
+    m_interval = interval;
+    update();
+}
 
 Qt::Alignment LinearGauge::alignment() const
 {
@@ -184,17 +192,13 @@ bool LinearGauge::textVisible() const
 
 void LinearGauge::keyPressEvent(QKeyEvent *event)
 {
-    if (m_value < 0)
-        return;
-
     switch (event->key())
     {
     case Qt::Key_Up:
         ++m_value;
         break;
     case Qt::Key_Down:
-        if (m_value > 0)
-            --m_value;
+        --m_value;
         break;
     default:
         return;
