@@ -11,6 +11,7 @@ add_library(GaugeIndicator
 
 target_include_directories(GaugeIndicator
     PUBLIC
+        ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 

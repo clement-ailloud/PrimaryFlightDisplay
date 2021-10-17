@@ -8,8 +8,8 @@
  * @author     Clement Ailloud
  */
 
-#include "qfont.h"
 #include "Qt"
+#include "qfont.h"
 
 class QBrush;
 class QFont;
@@ -30,10 +30,7 @@ void drawRoundedTick(QPainter& painter, const QRect& rect, float xRadius, float 
 
 void drawTick(QPainter& painter, const QRect& rect, const QBrush& brush);
 
-void drawText(QPainter& painter,
-              int x,
-              int y,
-              const QString& text,
+void drawText(QPainter& painter, int x, int y, const QString& text,
               Qt::Alignment alignment = Qt::AlignVCenter | Qt::AlignLeft);
 
 /**
@@ -41,18 +38,20 @@ void drawText(QPainter& painter,
  *
  * The rectangle refers to the position and size of the tick value.
  */
-void drawLargeTickLabel(QPainter& painter,
-                        const QRect& rect,
-                        int number = 0,
+void drawLargeTickLabel(QPainter& painter, const QRect& rect, int number = 0,
                         Qt::Alignment alignment = Qt::AlignLeft);
 
-void initializeTicksLabelValue(std::vector<int>& v, float value, unsigned long count,
-                               float interval);
+void drawLargeTickLabel(QPainter& painter, const QRect& rect, const QString& text,
+                        Qt::Alignment alignment = Qt::AlignLeft);
+
+void setTicksLabelValue(std::vector<int>& labels, float value, float interval, size_t count);
+
+void setCardinalDirections(std::vector<std::string>& v, int interval);
 
 /**
  * @brief   Draws the widget's border depending on border given the widget's size.
  */
-void drawBorder(QPainter &painter, const QSize& size);//, Border border);
+void drawBorder(QPainter& painter, const QSize& size, int flags);
 
 /**
  * @brief   Draws the path over the ground (i.e. values that cannot be reached).

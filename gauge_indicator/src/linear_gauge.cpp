@@ -32,7 +32,7 @@
 using TicksPosition = AbstractGauge::TicksPosition;
 
 /**
- *  Write a GTest fixture with an abritrary widget settings width, height...
+ *  Write a GTest fixture with abritrary widget settings width, height...
  *
  *  The test shall ensure the position of the ticks and labels are well set as well as the offset
  *  position increment when increment/decrement the value of the gauge.
@@ -46,15 +46,17 @@ constexpr auto g_verticalPadding{ 10 };   //<! Padding wrapping the text of the 
 const QBrush m_brush(QColor("#7ec850"));
 std::vector<int> g_vector; //!< Temporary container used to store data that will be displayed
 
-int getLabel(const unsigned long pos)
+int getLabel(const size_t pos)
 {
-    return g_vector.at(pos);
+    return g_vector[pos];
 }
 
 LinearGauge::LinearGauge(QWidget* parent)
     : AbstractGauge(parent)
     , g_largeTickPositionInterval(0.f)
     , m_borderVisible(true)
+    , m_borderPosition(BorderPosition::BorderRight | BorderPosition::BorderTop |
+                       BorderPosition::BorderRight | BorderPosition::BorderBottom)
     , m_groundVisible(true)
 {
     // TODO: Adapt font size depending on widget size and digit count
@@ -64,8 +66,6 @@ LinearGauge::LinearGauge(QWidget* parent)
     m_fontSize.setHeight(fm.ascent());
     // m_fontSize.setWidth(fm.horizontalAdvance("-000") + 1);
     // m_fontSize.setHeight(fm.height());
-
-    setTicksLabelValue(value(), largeTickCount(), largeTickInterval());
 
     const QSize tickLabelSize(m_fontSize.width(), m_fontSize.height());
     m_largeTickLabelRect.setSize(tickLabelSize);
@@ -107,6 +107,11 @@ void LinearGauge::setGroundVisible(bool visible)
     update();
 }
 
+void LinearGauge::setBorderPosition(int flags)
+{
+    m_borderPosition = flags;
+}
+
 /**
  * @brief   Scrolling 2D background
  *
@@ -120,73 +125,54 @@ void LinearGauge::paintEvent(QPaintEvent* /*event*/)
     // TODO: Test with big pen width
     // largeTickLabelRect.adjust(0, 0, -g_penWidth / 2, -g_penWidth / 2);
 
-    // * 2 for top and bottom, add one for centered tick and one for hidden tick
-    const auto _largeTickCount = largeTickCount() * 2ul + 1ul + 1ul;
-
-    std::cout << "value: " << value() << '\n';
-
-    static auto min = value() - largeTickInterval();
-    static auto max = value() + largeTickInterval();
-
-    if (value() >= max)
-    {
-        std::cout << "emit overflow()\n";
-        // setTicksLabelValue(value(), _largeTickCount, largeTickInterval());
-    }
-
-    if (value() <= min)
-    {
-        std::cout << "emit overflow()\n";
-        // setTicksLabelValue(value(), _largeTickCount, largeTickInterval());
-    }
-
-    min = Common::Math::floor(value(), largeTickInterval());
-    max = Common::Math::ceil(value(), largeTickInterval());
-
-    // if (offset == 0)
-    // {
-    // emit requestDataUpdate();
-    //     std::cout << "data update requested\n";
+    // std::cout << "value: " << value() << '\n';
     //
-    setTicksLabelValue(value(), _largeTickCount, largeTickInterval());
+    // static auto min = value() - largeTickInterval();
+    // static auto max = value() + largeTickInterval();
+    //
+    // if (value() >= max)
+    // {
+    //     std::cout << "emit overflow()\n";
     // }
     //
-    //   setTicksLabelValue(value(), _largeTickCount, largeTickInterval());
-    //
-    //
-    // Model
-    //
-    // connect(linearGauge, LinearGauge::requestDataUpdate, this, [linearGauge]()
+    // if (value() <= min)
     // {
-    //       // Consumers are free to use theirs own algorithms to fulfill the model. This last will
-    //       // be read by the linear gauge on requestDataUpdate signal emission.
-    //       linearGauge->setData(model);
-    // });
+    //     std::cout << "emit overflow()\n";
+    // }
+    //
+    // min = Common::Math::floor(value(), largeTickInterval());
+    // max = Common::Math::ceil(value(), largeTickInterval());
+
+    // TODO: try to remove one undrawn label, must be equal to the number of large ticks
+    // Add another mode to loop between a range for the heading indicator
+    const auto labelCount = largeTickCount() * 2ul + 1ul + 2ul;
+    setTicksLabelValue(g_vector, value(), largeTickInterval(), labelCount);
 
     const auto reminder = std::fmod(value(), largeTickInterval());
     const auto offset = std::fmod(reminder * (g_largeTickPositionInterval / largeTickInterval()),
                                   g_largeTickPositionInterval);
 
+    // * 2 for top and bottom, add one for centered tick and two for hidden ticks
+    const auto _largeTickCount = largeTickCount() * 2ul + 1ul + 2ul;
     {
-        const unsigned count = _largeTickCount;
+        const size_t count = _largeTickCount;
         drawLargeTicks(painter, count, offset);
     }
 
     {
-        const unsigned count =
-            (_largeTickCount + 1ul) * (middleTickCount() + 1ul) + middleTickCount() + 1ul;
+        const size_t count = _largeTickCount * (middleTickCount() + 1ul) + middleTickCount() + 1ul;
         drawMiddleTicks(painter, count, offset);
     }
 
     {
-        const unsigned count = _largeTickCount;
+        const size_t count = _largeTickCount;
         drawLargeTicksLabel(painter, count, offset);
     }
 
-    // if (m_borderVisible)
-    // {
-    //     drawBorder(painter, { width(), height() });
-    // }
+    if (m_borderVisible)
+    {
+        drawBorder(painter, size(), m_borderPosition);
+    }
 
     if (m_groundVisible)
     {
@@ -221,7 +207,7 @@ void LinearGauge::resizeEvent(QResizeEvent* /*event*/)
     {
         stepSize = static_cast<float>(height()) / visibleLargeTick;
         const auto tickHeight = stepSize * stepRatio;
-        largeTickThickness = static_cast<long>(tickHeight);
+        largeTickThickness = static_cast<unsigned long>(tickHeight);
 
         largeTickPadding = m_fontSize.width() + m_fontSize.width() / 2;
     }
@@ -230,7 +216,7 @@ void LinearGauge::resizeEvent(QResizeEvent* /*event*/)
     {
         stepSize = static_cast<float>(width()) / visibleLargeTick;
         const auto tickWidth = stepSize * stepRatio;
-        largeTickThickness = static_cast<long>(tickWidth);
+        largeTickThickness = static_cast<unsigned long>(tickWidth);
 
         largeTickPadding = g_verticalPadding + m_fontSize.height() + g_verticalPadding;
     }
@@ -239,7 +225,7 @@ void LinearGauge::resizeEvent(QResizeEvent* /*event*/)
 
     // Setup ticks interval
     const auto tickSpacer = stepSize * (1.f - stepRatio);
-    g_largeTickPositionInterval = largeTickThickness + tickSpacer;
+    g_largeTickPositionInterval = static_cast<float>(largeTickThickness) + tickSpacer;
 
     // Setup ticks position
     getTickPosition(m_largeTickRect, largeTickThickness, largeTickPadding);
@@ -405,37 +391,15 @@ void LinearGauge::setTicksLabelPosition(Qt::Orientation orientation, TicksPositi
     }
 }
 
-void LinearGauge::setTicksLabelValue(float value, unsigned long count, float interval)
-{
-    // Base drawn values on current value and remove the rest depending on interval
-    const int offset = Common::Math::floor(value, interval);
-
-    // Compute values range
-    const auto start = (count / 2ul) * interval + offset;
-    const auto stop = -(count / 2ul * interval - offset);
-
-    // TODO: to improve
-    g_vector.clear();
-    g_vector.reserve(largeTickCount() * 2);
-
-    const auto _interval = static_cast<unsigned>(interval);
-
-    // Fill array with step value
-    for (auto value = start; value >= stop; value -= _interval)
-    {
-        g_vector.push_back(value);
-    }
-}
-
 // TODO: replace offset type float by int
 void LinearGauge::drawLargeTicks(QPainter& painter, unsigned long count, float offset)
 {
     // Start drawing the first tick at the top (first tick and last tick are hidden outside the
-    // paint device) Add offset until next tick and so on
-    for (auto i = 0ul; i <= count; ++i)
+    // paint device). Add offset for the next tick and so on until the last one.
+    for (auto i = 0ul; i < count; ++i)
     {
         // Do not draw ticks and numbers for negative Y-axis
-        if (m_groundVisible && getLabel(i) < 0)
+        if (m_groundVisible && getLabel(i) <= 0)
             continue;
 
         const auto tmp =
@@ -452,14 +416,11 @@ void LinearGauge::drawMiddleTicks(QPainter& painter, unsigned long count, float 
 {
     const float interval = (g_largeTickPositionInterval / (middleTickCount() + 1ul));
 
-    for (auto i = 0l; i <= count; ++i)
+    for (auto i = 0l; i < count; ++i)
     {
-        // if (m_groundVisible && getLabel(i) < 0) continue;
-        //
         // Do not draw middle ticks for negative value
-        // {
+        // if (m_groundVisible && getLabel(i) <= 0)
         //     continue;
-        // }
 
         // Useless to draw middle tick on large tick
         if (i % (middleTickCount() + 1) == 0)
@@ -478,7 +439,7 @@ void LinearGauge::drawLargeTicksLabel(QPainter& painter, unsigned long count, fl
 {
     if (ticksPosition() == TicksPosition::TicksCenter)
     {
-        for (auto i = 0l; i <= count; ++i)
+        for (auto i = 0l; i < count; ++i)
         {
             if (m_groundVisible && getLabel(i) < 0)
                 continue;
@@ -516,7 +477,7 @@ void LinearGauge::drawLargeTicksLabel(QPainter& painter, unsigned long count, fl
     }
     else
     {
-        for (auto i = 0l; i <= count; ++i)
+        for (auto i = 0l; i < count; ++i)
         {
             if (m_groundVisible && getLabel(i) <= 0)
                 continue;

@@ -22,10 +22,12 @@ AirspeedIndicator::AirspeedIndicator(QWidget* parent)
     : QWidget(parent)
     , m_linearLayout(new QHBoxLayout())
     , m_linearGauge(new LinearGauge(this))
-//    , m_linearGaugeValue(new LinearGaugeValue(*m_linearGauge))
+// , m_linearGaugeValue(new LinearGaugeValue(*m_linearGauge))
 {
     m_linearGauge->setAlignment(Qt::AlignRight);
     m_linearGauge->setMiddleTickCount(1);
+    m_linearGauge->setBorderPosition(BorderPosition::BorderTop | BorderPosition::BorderRight |
+                                     BorderPosition::BorderBottom);
     QPalette palette;
     QColor backgroundColor("#7ec850");
     backgroundColor.setAlpha(64);

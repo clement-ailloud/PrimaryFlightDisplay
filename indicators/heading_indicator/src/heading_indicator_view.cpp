@@ -24,6 +24,7 @@ HeadingIndicator::HeadingIndicator(QWidget* parent)
     , m_linearGauge(new LinearGauge(this))
 {
     m_linearGauge->setAlignment(Qt::AlignBottom);
+    m_linearGauge->setBorderPosition(0);
     m_linearGauge->setTicksPosition(AbstractGauge::TicksPosition::TicksBelow);
     m_linearGauge->setOrientation(Qt::Horizontal);
     m_linearGauge->setGroundVisible(false);

@@ -177,6 +177,9 @@ unsigned long AbstractGauge::largeTickCount() const
 
 void AbstractGauge::setLargeTickCount(unsigned long numTicks)
 {
+    if (m_largeTickCount == numTicks)
+        return;
+
     m_largeTickCount = numTicks;
     update();
 }
@@ -191,6 +194,9 @@ unsigned long AbstractGauge::middleTickCount() const
 
 void AbstractGauge::setMiddleTickCount(unsigned long numTicks)
 {
+    if (m_middleTickCount == numTicks)
+        return;
+
     m_middleTickCount = numTicks;
     update();
 }
@@ -261,10 +267,10 @@ void AbstractGauge::keyPressEvent(QKeyEvent* event)
     switch (event->key())
     {
     case Qt::Key_Up:
-        ++m_value;
+        m_value += .5f;
         break;
     case Qt::Key_Down:
-        --m_value;
+        m_value -= .5f;
         break;
     default:
         return;

@@ -19,6 +19,7 @@ AttitudeIndicator::AttitudeIndicator(QWidget* parent)
 // , m_attitudeIndicatorSymbol(new AttitudeIndicatorSymbol(this))
 {
     m_linearGauge->setAlignment(Qt::AlignCenter);
+    m_linearGauge->setBorderPosition(0);
     m_linearGauge->setTicksPosition(AbstractGauge::TicksPosition::TicksCenter);
     m_linearGauge->setLargeTickInterval(10);
     m_linearGauge->setLargeTickCount(2);

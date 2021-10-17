@@ -14,6 +14,8 @@
 
 #include "gauge_indicator/abstract_gauge.h"
 
+#include "namespace.h"
+
 #include "qbrush.h"
 #include "qcolor.h"
 #include "qfont.h"
@@ -39,17 +41,13 @@ class LinearGauge : public AbstractGauge
     bool groundVisible() const;
     void setGroundVisible(bool visible);
 
-    enum Border
-    {
-        Left,
-        Right,
-        Top,
-        Bottom
-    };
-    Border border() const;
-    void setBorder(Border border);
+    int borderPosition() const;
+    void setBorderPosition(int flags);
     bool borderVisible() const;
     void setBorderVisible(bool visible);
+
+    int borderWidth() const;
+    void setBorderWidth(int width);
 
     const QBrush& brush() const;
     void setBrush(const QBrush& brush);
@@ -72,10 +70,7 @@ class LinearGauge : public AbstractGauge
     void getTickPosition(QRect& rect, int thickness, int padding);
     void setTicksLabelPosition(Qt::Orientation orientation, TicksPosition position);
 
-    // Helper for initializing the string of the labels
-    void setTicksLabelValue(float value, unsigned long count, float interval);
-
-    Border m_border;
+    int m_borderPosition;
     bool m_borderVisible; //<! This property holds whether the widget's borders are visible.
     bool m_groundVisible; //<! This property holds whether the ground is visible.
 

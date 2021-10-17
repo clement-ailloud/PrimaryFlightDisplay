@@ -26,6 +26,8 @@ AltitudeIndicator::AltitudeIndicator(QWidget* parent)
     m_linearGauge->setLargeTickInterval(10);
     m_linearGauge->setAlignment(Qt::AlignLeft);
     m_linearGauge->setTicksPosition(AbstractGauge::TicksPosition::TicksLeft);
+    m_linearGauge->setBorderPosition(BorderPosition::BorderTop | BorderPosition::BorderLeft |
+                                     BorderPosition::BorderBottom);
     m_linearGauge->setMiddleTickCount(1);
     QPalette palette;
     QColor backgroundColor("#7ec850");

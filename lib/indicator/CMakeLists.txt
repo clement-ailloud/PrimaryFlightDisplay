@@ -6,11 +6,13 @@ add_library(IndicatorFunctions
 
 target_include_directories(IndicatorFunctions
     PUBLIC
+        ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 target_link_libraries(IndicatorFunctions
     PRIVATE
+        Common
 	Qt5::Core
 	Qt5::Gui
 )
