@@ -140,7 +140,7 @@ void setCardinalDirections(std::vector<QString>& v, int interval)
 int textWidth(const QString& text, const QFont& font)
 {
     const QFontMetrics fm(font);
-    return fm.horizontalAdvance(text) + 1;
+    return fm.horizontalAdvance(text); // + 1;
 }
 
 int textHeight(const QFont& font)
@@ -158,6 +158,12 @@ QRect& adjusted(QRect& rect, const QString& text, const QFont& font)
 {
     rect.setSize(textSize(text, font));
     return rect;
+}
+
+float tickPositionFromValue(float value, float interval, float tickInterval)
+{
+    const auto reminder = std::fmod(value, interval);
+    return std::fmod(reminder * (tickInterval / interval), tickInterval);
 }
 
 // } // end namespace QtHelper

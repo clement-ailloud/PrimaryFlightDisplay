@@ -7,6 +7,13 @@
 #include "qwidget.h"
 
 class QGridLayout;
+class QHBoxLayout;
+class QVBoxLayout;
+
+namespace Controller
+{
+class Joystick;
+}
 
 namespace View
 {
@@ -17,7 +24,7 @@ class HeadingIndicator;
 
 class PrimaryFlightDisplay : public QWidget, public IPrimaryFlightDisplayView
 {
-  public:
+public:
     explicit PrimaryFlightDisplay(QWidget* parent = nullptr);
 
     ~PrimaryFlightDisplay() override;
@@ -27,12 +34,17 @@ class PrimaryFlightDisplay : public QWidget, public IPrimaryFlightDisplayView
     void setAltitude(float) override;
     void setHeading(float) override;
 
-  private:
-    QPointer<QGridLayout> m_gridLayout;
+private:
+    QPointer<QGridLayout> m_mainLayout;
+    QPointer<QGridLayout> m_flightInstrumentsLayout;
+    QPointer<QHBoxLayout> m_controllersLayout;
+    QPointer<QVBoxLayout> m_verticalLayout;
     QPointer<AirspeedIndicator> m_speedIndicator;
     QPointer<AltitudeIndicator> m_altitudeIndicator;
     QPointer<AttitudeIndicator> m_attitudeIndicator;
     QPointer<HeadingIndicator> m_headingIndicator;
+    Controller::Joystick* m_leftJoystick;
+    Controller::Joystick* m_rightJoystick;
 
     Q_DISABLE_COPY(PrimaryFlightDisplay);
 };

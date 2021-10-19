@@ -85,3 +85,5 @@ QSize textSize(const QString& text, const QFont& font);
  * @param   font for the text
  */
 QRect& adjusted(QRect& rect, const QString& text, const QFont& font);
+
+float tickPositionFromValue(float value, float interval, float tickInterval);

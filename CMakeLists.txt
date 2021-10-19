@@ -47,18 +47,33 @@ if(CMAKE_PLATFORM_ID STREQUAL "Linux")
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 endif()
 
+set(CMAKE_TLS_VERIFY TRUE)
+
 #find_package(Git REQUIRED)
 include(ExternalProject)
-ExternalProject_Add(
-    VirtualJoystickController
+ExternalProject_Add(VirtualJoystickControllerProject
+    PREFIX external/VirtualJoystickController
     GIT_REPOSITORY https://github.com/clement-ailloud/VirtualJoystickController
     GIT_TAG develop
     TIMEOUT 10
     UPDATE_COMMAND ""#${GIT_EXECUTABLE} pull"
     INSTALL_COMMAND ""
-    BINARY_DIR ${CMAKE_BINARY_DIR}/external
-    DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/downloads
+    BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/external/VirtualJoystickController/src/VirtualJoystickControllerProject-build/Debug/libVirtualJoystickController.so
 )
+add_library(VirtualJoystickController SHARED IMPORTED)
+
+target_include_directories(VirtualJoystickController
+    INTERFACE
+        ${CMAKE_BINARY_DIR}/external/VirtualJoystickController/src/VirtualJoystickControllerProject/include
+)
+
+ExternalProject_Get_Property(VirtualJoystickControllerProject BINARY_DIR)
+set_property(TARGET VirtualJoystickController
+    PROPERTY
+        IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/${BINARY_DIR}/Debug/libVirtualJoystickController.so
+)
+
+file(COPY_FILE "${BINARY_DIR}/Debug/libVirtualJoystickController.so" "${CMAKE_BINARY_DIR}/${CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG}/libVirtualJoystickController.so")
 
 find_package(Qt5
     COMPONENTS
@@ -80,8 +95,11 @@ if(ANDROID)
     )
 endif()
 
+add_dependencies(${CMAKE_PROJECT_NAME} VirtualJoystickControllerProject)
+
 target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
+        VirtualJoystickController
         FlightInstruments
 	Qt5::Widgets
 )
@@ -103,8 +121,7 @@ install(TARGETS ${CMAKE_PROJECT_NAME}
 add_subdirectory(primary_flight_display)
 add_subdirectory(lib)
 add_subdirectory(text_item)
-add_subdirectory(gauge_indicator)
-add_subdirectory(indicators)
+add_subdirectory(widgets)
 
 if(NOT ANDROID)
     list(APPEND CMAKE_CTEST_ARGUMENTS "--verbose")
