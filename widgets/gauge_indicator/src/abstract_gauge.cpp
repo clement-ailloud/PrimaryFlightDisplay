@@ -24,7 +24,7 @@ Qt::Alignment getLabelAlignment(TicksPosition position)
     switch (position)
     {
     case TicksPosition::TicksRight:
-        return Qt::AlignVCenter | Qt::AlignRight;
+        return Qt::AlignBottom | Qt::AlignRight;
     case TicksPosition::TicksLeft:
         return Qt::AlignVCenter | Qt::AlignLeft;
     case TicksPosition::TicksAbove:
@@ -41,8 +41,8 @@ AbstractGauge::AbstractGauge(QWidget* parent)
     , m_alignment(Qt::AlignRight)
     , m_orientation(Qt::Vertical)
     , m_ticksPosition(TicksRight)
+    , m_font("Cantarell", 17, QFont::Bold)
     , m_labelVisible(true)
-    , m_font("Cantarell", 16, QFont::Bold)
     , m_largeTickInterval(5.f)
     , m_largeTickCount(3ul)
     , m_middleTickCount(1ul)

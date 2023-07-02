@@ -53,7 +53,7 @@ protected:
     void update(std::vector<QString>& labels) override;
 
 private:
-    float g_largeTickPositionInterval;
+    float m_stepSpan;
 
     // Helpers for drawing ticks and labels
     void drawLargeTicks(QPainter& painter, unsigned long count, float offset);
@@ -62,12 +62,13 @@ private:
     void drawLargeTicksLabel(QPainter& painter, unsigned long count, float offset);
 
     // Helpers for setting the rectangle of ticks and labels
-    void getTickPosition(QRect& rect, int thickness, int padding);
-    void setTicksLabelPosition(Qt::Orientation orientation, TicksPosition position);
+    void getTickCoordinates(QRect& rect, int thickness, int padding, Qt::Orientation orientation,
+                            TicksPosition ticksPosition);
+    void moveTicksLabel(Qt::Orientation orientation, TicksPosition position);
 
+    int m_borderWidth;
     int m_borderPosition;
     bool m_borderVisible; //<! This property holds whether the widget's borders are visible.
-    int m_borderWidth;
 
     bool m_groundVisible; //<! This property holds whether the ground is visible.
 

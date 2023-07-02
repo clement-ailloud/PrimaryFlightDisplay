@@ -37,10 +37,10 @@ using TicksPosition = AbstractGauge::TicksPosition;
  *  position increment when increment/decrement the value of the gauge.
  */
 
-constexpr auto g_penWidth{ 1 };
+constexpr auto g_penWidth{ 2 };
 constexpr auto g_horizontalPadding{ 30 }; //<! Padding wrapping the text of the tick's value.
 constexpr auto g_verticalPadding{ 5 };    //<! Padding wrapping the text of the tick's value.
-// auto g_largeTickPositionInterval{0.f};
+// auto m_stepSpan{0.f};
 
 const QBrush m_brush(QColor("#7ec850"));
 std::vector<int> g_vector; //!< Temporary container used to store data that will be displayed
@@ -53,7 +53,7 @@ int getLabel(const size_t pos)
 
 LinearGauge::LinearGauge(QWidget* parent)
     : AbstractGauge(parent)
-    , g_largeTickPositionInterval(0.f)
+    , m_stepSpan(0.f)
     , m_borderPosition(BorderPosition::BorderRight | BorderPosition::BorderTop |
                        BorderPosition::BorderRight | BorderPosition::BorderBottom)
     , m_borderVisible(true)
@@ -144,6 +144,8 @@ void LinearGauge::paintEvent(QPaintEvent* /*event*/)
 {
     QPainter painter(this);
 
+    painter.drawLine(0, height() / 2, width(), height() / 2);
+
     // Remove pen width used for drawing
     // TODO: Test with big pen width
     // largeTickLabelRect.adjust(0, 0, -g_penWidth / 2, -g_penWidth / 2);
@@ -174,8 +176,7 @@ void LinearGauge::paintEvent(QPaintEvent* /*event*/)
 
     update(g_labels);
 
-    const auto tickPosition =
-        tickPositionFromValue(value(), largeTickInterval(), g_largeTickPositionInterval);
+    const auto tickPosition = tickPositionFromValue(value(), largeTickInterval(), m_stepSpan);
 
     {
         const size_t count = _largeTickCount;
@@ -194,7 +195,7 @@ void LinearGauge::paintEvent(QPaintEvent* /*event*/)
 
     if (m_groundVisible)
     {
-        const auto y = (value() * g_largeTickPositionInterval) / largeTickInterval();
+        const auto y = (value() * m_stepSpan) / largeTickInterval();
         const auto rect = QRect(QPoint(0, y + height() / 2), QPoint(width(), y + height()));
 
         // QLinearGradient linearGradient(rect.topLeft(), rect.bottomLeft());
@@ -214,106 +215,104 @@ void LinearGauge::paintEvent(QPaintEvent* /*event*/)
 
 void LinearGauge::resizeEvent(QResizeEvent* /*event*/)
 {
-    auto stepSize = 0.f;
-    const auto stepRatio = 0.015f;
+    // Remove hidden tick (e.g next tick that will be visible)
+    const auto visibleLargeTick = largeTickCount() * 2ul + 1ul + 1ul - 1ul;
 
     auto largeTickPadding = 0ul;
-    auto largeTickThickness = 0ul;
-
-    // Remove hidden tick (next tick that will be visible)
-    const auto visibleLargeTick = static_cast<float>(largeTickCount()) * 2.f + 1.f + 1.f - 1.f;
-
-    // Remove hidden tick from computation
     switch (orientation())
     {
     case Qt::Vertical:
     {
-        stepSize = static_cast<float>(height()) / visibleLargeTick;
-        const auto tickHeight = stepSize * stepRatio;
-        largeTickThickness = static_cast<unsigned long>(tickHeight);
-
         largeTickPadding = m_fontSize.width() + m_fontSize.width() / 2;
     }
     break;
     case Qt::Horizontal:
     {
-        stepSize = static_cast<float>(width()) / visibleLargeTick;
-        const auto tickWidth = stepSize * stepRatio;
-        largeTickThickness = static_cast<unsigned long>(tickWidth);
-
         largeTickPadding = g_verticalPadding + m_fontSize.height() + g_verticalPadding;
     }
     break;
     }
 
-    // Setup ticks interval
-    const auto tickSpacer = stepSize * (1.f - stepRatio);
-    g_largeTickPositionInterval = static_cast<float>(largeTickThickness) + tickSpacer;
+    m_stepSpan = getStepSpan<float>(size(), visibleLargeTick, orientation());
 
-    // Setup large ticks position
-    getTickPosition(m_largeTickRect, largeTickThickness, largeTickPadding);
+    const auto tickSpanRatio = 0.02;
+    const auto largeTickspan = m_stepSpan * tickSpanRatio;
+
+    // Setup large ticks size and position
+    getTickCoordinates(m_largeTickRect, largeTickspan, largeTickPadding, orientation(),
+                       ticksPosition());
 
     // Setup middle ticks
-    const auto middleTickThickness = largeTickThickness / 2;
-    const auto middleTickPadding = largeTickPadding + m_largeTickRect.width() / 4;
+    const auto middleTickSpan = largeTickspan / 2;
+    const auto middleTickPadding =
+        getMiddleTickPadding(m_largeTickRect.size(), largeTickPadding, orientation());
 
-    // Setup ticks position
-    getTickPosition(m_middleTickRect, middleTickThickness, middleTickPadding);
+    // Setup middle ticks size and position
+    getTickCoordinates(m_middleTickRect, middleTickSpan, middleTickPadding, orientation(),
+                       ticksPosition());
 
     // Setup small ticks
-    const auto smallTickThickness = largeTickThickness / 4;
-    const auto smallTickPadding = largeTickPadding + m_largeTickRect.width() / 2;
+    const auto smallTickSpan = largeTickspan / 4;
+    const auto smallTickPadding =
+        getSmallTickPadding(m_largeTickRect.size(), largeTickPadding, orientation());
 
-    // Setup ticks position
-    getTickPosition(m_smallTickRect, smallTickThickness, smallTickPadding);
+    // Setup ticks size and position
+    getTickCoordinates(m_smallTickRect, smallTickSpan, smallTickPadding, orientation(),
+                       ticksPosition());
 
-    // Setup ticks value
-    setTicksLabelPosition(orientation(), ticksPosition());
+    // Move ticks value according to window size
+    moveTicksLabel(orientation(), ticksPosition());
 }
 
 void LinearGauge::update(std::vector<QString>& labels)
 {
-    setTicksLabelValue(g_vector, value(), largeTickInterval(), labels.size());
+    updateTicksLabelValue(g_vector, value(), largeTickInterval(), labels.size());
     std::transform(g_vector.cbegin(), g_vector.cend(), labels.begin(),
                    [](const auto label) { return QString::number(label); });
 }
 
 void LinearGauge::initPainter(QPainter* painter) const
 {
-    // Set rendering quality
+#ifdef NDEBUG
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setRenderHint(QPainter::TextAntialiasing);
+#endif
 
     // Set theme color
+#ifdef NDEBUG
     QPen pen(m_brush, g_penWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+#else
+    QPen pen(m_brush, g_penWidth);
+#endif
     painter->setPen(pen);
     painter->setFont(font());
     painter->setBrush(m_brush);
 }
 
-void LinearGauge::getTickPosition(QRect& rect, int thickness, int padding)
+void LinearGauge::getTickCoordinates(QRect& rect, int span, int padding,
+                                     Qt::Orientation orientation, TicksPosition ticksPosition)
 {
     auto x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
-    // Set tick thickness depending on orientation
-    switch (orientation())
+    // Set tick span depending on orientation
+    switch (orientation)
     {
     case Qt::Horizontal:
     {
-        x1 = width() / 2 - thickness;
-        x2 = width() / 2 + thickness;
+        x1 = width() / 2 - span;
+        x2 = width() / 2 + span;
         break;
     }
     case Qt::Vertical:
     {
-        y1 = height() / 2 - thickness;
-        y2 = height() / 2 + thickness;
+        y1 = height() / 2 - span;
+        y2 = height() / 2 + span;
         break;
     }
     }
 
     // Set position depending on orientation and alignment
-    switch (static_cast<int>(orientation()) | static_cast<int>(ticksPosition()))
+    switch (static_cast<int>(orientation) | static_cast<int>(ticksPosition))
     {
     case Qt::Vertical | TicksPosition::TicksLeft:
     {
@@ -358,7 +357,7 @@ void LinearGauge::getTickPosition(QRect& rect, int thickness, int padding)
     rect.setCoords(x1, y1, x2, y2);
 }
 
-void LinearGauge::setTicksLabelPosition(Qt::Orientation orientation, TicksPosition position)
+void LinearGauge::moveTicksLabel(Qt::Orientation orientation, TicksPosition position)
 {
     switch (static_cast<int>(orientation) | static_cast<int>(position))
     {
@@ -432,8 +431,7 @@ void LinearGauge::drawLargeTicks(QPainter& painter, unsigned long count, float o
         if (m_groundVisible && getLabel(i) <= 0)
             continue;
 
-        const auto tmp =
-            (static_cast<long>(i - count / 2ul)) * g_largeTickPositionInterval + offset;
+        const auto tmp = (static_cast<long>(i - count / 2ul)) * m_stepSpan + offset;
 
         auto x = 0, y = 0; // NOLINT(readability-isolate-declaration)
         (orientation() == Qt::Vertical) ? y = tmp : x = tmp;
@@ -444,7 +442,7 @@ void LinearGauge::drawLargeTicks(QPainter& painter, unsigned long count, float o
 
 void LinearGauge::drawMiddleTicks(QPainter& painter, unsigned long count, float offset)
 {
-    const float interval = (g_largeTickPositionInterval / (middleTickCount() + 1ul));
+    const float interval = (m_stepSpan / (middleTickCount() + 1ul));
 
     for (auto i = 0l; i < count; ++i)
     {
@@ -459,7 +457,7 @@ void LinearGauge::drawMiddleTicks(QPainter& painter, unsigned long count, float 
         const auto tmp = (i - static_cast<long>(count / 2ul)) * interval + offset;
 
         auto x = 0, y = 0;
-        (orientation() == Qt::Vertical) ? y = tmp : x = tmp;
+        (orientation() == Qt::Vertical) ? y = tmp - m_middleTickRect.height() / 2 : x = tmp;
 
         drawTick(painter, m_middleTickRect.translated(x, y));
     }
@@ -474,33 +472,24 @@ void LinearGauge::drawLargeTicksLabel(QPainter& painter, unsigned long count, fl
             if (m_groundVisible && getLabel(i) < 0)
                 continue;
 
-            auto x = 0, y = 0;
-            const auto tmp =
-                (i - static_cast<long>(count / 2ul)) * g_largeTickPositionInterval + offset;
+            const auto tmp = (i - static_cast<long>(count / 2ul)) * m_stepSpan + offset;
 
+            auto x = 0, y = 0;
             if (orientation() == Qt::Vertical)
             {
+                painter.setBrush(Qt::NoBrush);
+                painter.drawRect(m_largeTickLabelRectLeft);
                 y = tmp;
                 drawLargeTickLabel(painter, m_largeTickLabelRectLeft.translated(x, y), getLabel(i),
                                    getLabelAlignment(TicksPosition::TicksRight));
 
-                // TextItem m_largeTickTextItemLeft(QString::number(getLabel(i), font());
-                // m_largeTickTextItemLeft.translate(x, y);
-                // drawTextItem(painter, m_largeTickTextItemLeft);
-
                 drawLargeTickLabel(painter, m_largeTickLabelRectRight.translated(x, y), getLabel(i),
                                    getLabelAlignment(TicksPosition::TicksLeft));
-                // painter.drawRect(m_largeTickLabelRectRight.translated(x, y));
             }
             else
             {
                 x = tmp;
-                // drawLargeTickLabel(painter, m_largeTickLabelRectTop.translated(x, y),
-                // getLabel(i), Qt::AlignHCenter | Qt::AlignBottom);
                 painter.drawRect(m_largeTickLabelRectTop.translated(x, y));
-
-                // drawLargeTickLabel(painter, m_largeTickLabelRectBottom.translated(x, y),
-                // getLabel(i), Qt::AlignHCenter | Qt::AlignTop);
                 painter.drawRect(m_largeTickLabelRectBottom.translated(x, y));
             }
         }
@@ -512,23 +501,12 @@ void LinearGauge::drawLargeTicksLabel(QPainter& painter, unsigned long count, fl
             if (m_groundVisible && getLabel(i) <= 0)
                 continue;
 
-            const auto tmp =
-                (i - static_cast<long>(count / 2ul)) * g_largeTickPositionInterval + offset;
+            const auto tmp = (i - static_cast<long>(count / 2ul)) * m_stepSpan + offset;
 
             auto x = 0, y = 0;
-            if (orientation() == Qt::Vertical)
-            {
-                y = tmp;
-            }
-            else
-            {
-                x = tmp;
-            }
-
+            (orientation() == Qt::Vertical) ? y = tmp : x = tmp;
             drawLargeTickLabel(painter, m_largeTickLabelRect.translated(x, y), getLabel(i),
                                getLabelAlignment(ticksPosition()));
-            // painter.setBrush(Qt::NoBrush);
-            // painter.drawRect(m_largeTickLabelRect.translated(x, y));
         }
     }
 }

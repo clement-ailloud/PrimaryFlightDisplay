@@ -8,6 +8,7 @@
 
 class QGridLayout;
 class QHBoxLayout;
+class QSpacerItem;
 class QVBoxLayout;
 
 namespace Controller
@@ -35,6 +36,7 @@ public:
     void setHeading(float) override;
 
 private:
+    QSpacerItem* m_topSpacer;
     QPointer<QGridLayout> m_mainLayout;
     QPointer<QGridLayout> m_flightInstrumentsLayout;
     QPointer<QHBoxLayout> m_controllersLayout;
@@ -43,8 +45,8 @@ private:
     QPointer<AltitudeIndicator> m_altitudeIndicator;
     QPointer<AttitudeIndicator> m_attitudeIndicator;
     QPointer<HeadingIndicator> m_headingIndicator;
-    Controller::Joystick* m_leftJoystick;
-    Controller::Joystick* m_rightJoystick;
+    QPointer<Controller::Joystick> m_leftJoystick;
+    QPointer<Controller::Joystick> m_rightJoystick;
 
     Q_DISABLE_COPY(PrimaryFlightDisplay);
 };

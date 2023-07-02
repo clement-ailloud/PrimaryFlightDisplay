@@ -1,0 +1,31 @@
+class EngineMonitoringSystem {
+}
+
+package InputControls {
+
+package Widgets {
+class Joystick {
+}
+InputControlWidget <|-down- Joystick
+}
+
+package Logic {
+class EngineControl {
+
+}
+
+class YawInputHandler {
+}
+
+class PitchInputHandler {
+}
+
+class RollInputHandler {
+}
+
+class ThrottleInputHandler {
+}
+}
+
+class InputControl<...ValueTypes> {
+}

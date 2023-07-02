@@ -29,7 +29,9 @@
 //
 void drawTick(QPainter& painter, const QRect& rect)
 {
-    painter.drawRect(rect);
+    const auto penWidth = painter.pen().width();
+    painter.drawRoundedRect(rect.adjusted(penWidth / 2, penWidth / 2, -penWidth, -penWidth), 1.5,
+                            1.5);
 }
 
 void drawRoundedTick(QPainter& painter, const QRect& rect, float xRadius, float yRadius,
@@ -101,7 +103,7 @@ void drawGround(QPainter& painter, const QRect& rect, const QBrush& brush)
 
 // Helper for initializing the string of the labels
 // Range is computed depending on the value
-void setTicksLabelValue(std::vector<int>& labels, float value, float interval, size_t count)
+void updateTicksLabelValue(std::vector<int>& labels, float value, float interval, size_t count)
 {
     assert(interval >= 0.f);
 
@@ -126,7 +128,7 @@ void setCardinalDirections(std::vector<QString>& v, int interval)
                                                         { 135, "SE" }, { 180, "S" }, { 225, "SW" },
                                                         { 270, "S" },  { 315, "NW" } };
 
-    size_t count = 360 / interval;
+    const size_t count = 360 / interval;
     if (v.size() <= 0)
         v.resize(count);
 
@@ -140,13 +142,13 @@ void setCardinalDirections(std::vector<QString>& v, int interval)
 int textWidth(const QString& text, const QFont& font)
 {
     const QFontMetrics fm(font);
-    return fm.horizontalAdvance(text); // + 1;
+    return fm.horizontalAdvance(text);
 }
 
 int textHeight(const QFont& font)
 {
     const QFontMetrics fm(font);
-    return fm.ascent();
+    return fm.capHeight() + 1;
 }
 
 QSize textSize(const QString& text, const QFont& font)
@@ -160,10 +162,20 @@ QRect& adjusted(QRect& rect, const QString& text, const QFont& font)
     return rect;
 }
 
-float tickPositionFromValue(float value, float interval, float tickInterval)
+float tickPositionFromValue(float value, float interval, float tickSpan)
 {
     const auto reminder = std::fmod(value, interval);
-    return std::fmod(reminder * (tickInterval / interval), tickInterval);
+    return std::fmod(reminder * (tickSpan / interval), tickSpan);
+}
+
+int getMiddleTickPadding(const QSize& size, int padding, Qt::Orientation orientation)
+{
+    return padding + ((orientation == Qt::Vertical) ? size.width() : size.height()) / 4;
+}
+
+int getSmallTickPadding(const QSize& size, int padding, Qt::Orientation orientation)
+{
+    return padding + ((orientation == Qt::Vertical) ? size.width() : size.height()) / 2;
 }
 
 // } // end namespace QtHelper

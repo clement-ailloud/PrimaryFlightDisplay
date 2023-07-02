@@ -1,0 +1,30 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: sort-simple-yaml
+    -   id: check-added-large-files
+    -   id: check-json
+    -   id: check-merge-conflict
+      #-   id: name-tests-test # To replace with generic one width argument for test prefix or suffix
+-   repo: local
+    hooks:
+    -   id: clang-format
+        name: clang-format
+        entry: clang-format
+        args: ["--verbose", "-style=file", "-i"]
+        language: system
+        files: \.(c|cc|cxx|cpp|h|hpp|hxx)$
+        types: [file, text]
+    #-   id: clang-tidy
+    #    name: clang-tidy
+    #    entry: clang-tidy
+    #    args: ["--use-color", "--quiet", "--config-file=.clang-tidy", "-p=build/"]
+    #    files: \.(c|cc|cxx|cpp|h|hpp|hxx)$
+    #    language: system
+    #    verbose: true

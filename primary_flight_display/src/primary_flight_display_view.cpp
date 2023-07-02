@@ -18,6 +18,7 @@ using namespace View;
 
 PrimaryFlightDisplay::PrimaryFlightDisplay(QWidget* parent)
     : QWidget(parent)
+    , m_topSpacer(new QSpacerItem(0, 200))
     , m_mainLayout(new QGridLayout())
     , m_flightInstrumentsLayout(new QGridLayout())
     , m_controllersLayout(new QHBoxLayout())
@@ -29,34 +30,26 @@ PrimaryFlightDisplay::PrimaryFlightDisplay(QWidget* parent)
     , m_leftJoystick(new Controller::Joystick(this))
     , m_rightJoystick(new Controller::Joystick(this))
 {
-    {
-        auto left = 0, top = 0, right = 0, bottom = 0;
-        m_controllersLayout->getContentsMargins(&left, &top, &right, &bottom);
+    m_headingIndicator->setMinimumSize({ 400, 60 });
+    m_speedIndicator->setMinimumSize({ 100, 300 });
+    m_attitudeIndicator->setMinimumSize({ 400, 400 });
+    m_altitudeIndicator->setMinimumSize({ 100, 300 });
 
-        QMargins margins(left, top, right, bottom);
-        m_flightInstrumentsLayout->setContentsMargins(width() * .9, top, width() * .9, bottom);
-    }
+    // m_flightInstrumentsLayout->setSizeConstraint(QLayout::SetFixedSize);
+    m_flightInstrumentsLayout->addWidget(m_headingIndicator, 0, 1,
+                                         Qt::AlignBottom | Qt::AlignCenter);
+    m_flightInstrumentsLayout->addWidget(m_speedIndicator, 2, 0, Qt::AlignRight);
+    m_flightInstrumentsLayout->addWidget(m_attitudeIndicator, 2, 1, Qt::AlignCenter);
+    m_flightInstrumentsLayout->addWidget(m_altitudeIndicator, 2, 2, Qt::AlignLeft);
 
-    m_flightInstrumentsLayout->setSizeConstraint(QLayout::SetFixedSize);
-    m_flightInstrumentsLayout->addWidget(m_headingIndicator, 0, 1, 2,
-                                         5); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
-    m_flightInstrumentsLayout->addWidget(m_speedIndicator, 2, 0, 10,
-                                         1); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
-    m_flightInstrumentsLayout->addWidget(m_attitudeIndicator, 2, 2, 10,
-                                         3); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
-    m_flightInstrumentsLayout->addWidget(m_altitudeIndicator, 2, 6, 10,
-                                         1); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+    m_controllersLayout->addWidget(m_leftJoystick, Qt::AlignVCenter | Qt::AlignLeft);
+    m_controllersLayout->addWidget(m_rightJoystick, Qt::AlignVCenter | Qt::AlignRight);
 
-    m_controllersLayout->addWidget(m_leftJoystick);
-    m_controllersLayout->addWidget(m_rightJoystick);
-
-    m_verticalLayout->addItem(new QSpacerItem(0, 200));
+    m_verticalLayout->addItem(m_topSpacer);
     m_verticalLayout->addLayout(m_flightInstrumentsLayout);
-    m_verticalLayout->addLayout(m_controllersLayout);
+    m_verticalLayout->addLayout(m_controllersLayout, Qt::AlignBottom);
 
     setLayout(m_verticalLayout);
-
-    qDebug() << m_leftJoystick->geometry();
 }
 
 PrimaryFlightDisplay::~PrimaryFlightDisplay() = default;

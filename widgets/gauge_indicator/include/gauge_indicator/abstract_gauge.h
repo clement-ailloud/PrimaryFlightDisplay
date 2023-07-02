@@ -98,8 +98,8 @@ private:
     Qt::Orientation m_orientation;
     TicksPosition m_ticksPosition;
 
-    bool m_labelVisible;
     QFont m_font;
+    bool m_labelVisible;
 
     float m_minimum;
     float m_maximum;
